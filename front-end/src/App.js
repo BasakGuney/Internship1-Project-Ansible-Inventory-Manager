@@ -121,7 +121,7 @@ function App() {
                                     });
                                     setYamlText(text);
                                   }}
-                                  value={key + ":\n"}
+                                  value={JSON.stringify(key) + ":\n"}
                                   id={key}
                                   defaultChecked={
                                     initialCheckedItems[key] !== undefined
@@ -169,7 +169,12 @@ function App() {
                                           setYamlText(text);
                                         }}
                                         id={key + "." + subKey}
-                                        value={"\t" + obj[key][subKey]}
+                                        value={
+                                          "\t" +
+                                          JSON.stringify(obj[key]) +
+                                          ": " +
+                                          JSON.stringify(obj[key][subKey])
+                                        }
                                         defaultChecked={
                                           Array.isArray(
                                             initialCheckedItems[key]
@@ -191,7 +196,7 @@ function App() {
                             ) : null
                           )}
 
-                          <Text>{yamlText}</Text>
+                          <textarea value={yamlText}></textarea>
                         </TabPanel>
                         <TabPanel></TabPanel>
                         <TabPanel></TabPanel>
