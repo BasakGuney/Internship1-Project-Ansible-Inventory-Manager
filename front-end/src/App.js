@@ -94,13 +94,6 @@ function App() {
                             Array.isArray(obj[key]) ? (
                               <>
                                 <Checkbox
-                                  value={key + ":\n"}
-                                  id={key}
-                                  defaultChecked={
-                                    initialCheckedItems[key] !== undefined
-                                      ? true
-                                      : false
-                                  }
                                   onChange={() => {
                                     let text = "";
                                     Object.keys(obj).map((key) => {
@@ -128,6 +121,13 @@ function App() {
                                     });
                                     setYamlText(text);
                                   }}
+                                  value={key + ":\n"}
+                                  id={key}
+                                  defaultChecked={
+                                    initialCheckedItems[key] !== undefined
+                                      ? true
+                                      : false
+                                  }
                                 >
                                   {key}
                                 </Checkbox>
@@ -168,7 +168,7 @@ function App() {
                                           });
                                           setYamlText(text);
                                         }}
-                                        id={subKey}
+                                        id={key + "." + subKey}
                                         value={"\t" + obj[key][subKey]}
                                         defaultChecked={
                                           Array.isArray(
@@ -190,7 +190,8 @@ function App() {
                               </>
                             ) : null
                           )}
-                          <Text value={yamlText}></Text>
+
+                          <Text>{yamlText}</Text>
                         </TabPanel>
                         <TabPanel></TabPanel>
                         <TabPanel></TabPanel>
