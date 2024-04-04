@@ -1,11 +1,15 @@
 import { Link, Menu, MenuItem, MenuList, MenuButton } from "@chakra-ui/react";
 import { ChevronDownIcon } from "@chakra-ui/icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 
 const FileButton = () => {
   const [hostVarFiles, setHostVarFiles] = useState([]);
-  axios.get("/host-vars").then((res) => setHostVarFiles(res.data.hostVarFiles));
+  useEffect(() => {
+    axios
+      .get("/host-vars")
+      .then((res) => setHostVarFiles(res.data.hostVarFiles));
+  }, []);
   return (
     <>
       <Menu>
@@ -25,7 +29,14 @@ const FileButton = () => {
           {hostVarFiles.map((file) => {
             return (
               <MenuItem>
-                <Link href={window.location + "/host-vars/" + file}>
+                <Link
+                  href={
+                    "/" +
+                    (window.location + "").split("/")[3] +
+                    "/host-vars/" +
+                    file
+                  }
+                >
                   {file}
                 </Link>
               </MenuItem>

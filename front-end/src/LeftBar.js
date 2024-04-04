@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useState } from "react";
+import { useEffect } from "react";
 import axios from "axios";
 import yaml from "yaml";
 
@@ -32,11 +33,13 @@ const LeftBar = () => {
   const [came, setCame] = useState(false);
   const [inventory, setInventory] = useState();
 
-  axios.post("/host-vars", { ref: k[5] }).then((res) => {
-    setObj(res.data.response);
-    setInventory(res.data.inventory);
-    setCame(true);
-  });
+  useEffect(() => {
+    axios.post("/host-vars", { ref: k[5] }).then((res) => {
+      setObj(res.data.response);
+      setInventory(res.data.inventory);
+      setCame(true);
+    });
+  }, [2]);
 
   function edit() {
     setDisable(false);
@@ -70,9 +73,7 @@ const LeftBar = () => {
           <AccordionPanel pb={4} bg="#FFF5F5">
             {typeof nodes[1] === "object" ? (
               Array.isArray(nodes[1]) ? (
-                nodes[1].map((node) =>
-                  Object.entries(node).map((item) => renderTree(item, path))
-                )
+                Object.entries(nodes[1]).map((item) => renderTree(item, path))
               ) : (
                 Object.entries(nodes[1]).map((node) => renderTree(node, path))
               )

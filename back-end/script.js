@@ -8,6 +8,12 @@ const decompress = require("decompress");
 let inventoryName;
 let inventoryPath;
 
+const content = fs.readFileSync(
+  __dirname + "/uploads/inventory/hosts",
+  "utf-8"
+);
+console.log(content.replaceAll(/(\r\n\r\n)+/g, "\r\n").split("\r\n\r\n"));
+
 // express app
 const app = express();
 app.use(express.json());
@@ -41,13 +47,13 @@ app.post("/", uploads.single("files"), (req, res) => {
     (__dirname + "/uploads/" + req.body.filename).split(".zip")[0] + "";
 });
 app.post("/host-vars", (req, res) => {
-  const path = "./" + req.body.ref;
+  const path = "./uploads/" + inventoryName + "/host_vars/" + req.body.ref;
   let obj1 = yaml.load(fs.readFileSync(path, "utf-8"));
   res.send({ response: obj1, inventory: inventoryName });
 });
 
 app.post("/host-vars-expanded", (req, res) => {
-  const path = "./" + req.body.ref;
+  const path = "./uploads/" + inventoryName + "/host_vars/" + req.body.ref;
 
   const arr = req.body.itemArr;
   let obj1 = yaml.load(fs.readFileSync(path, "utf-8"));

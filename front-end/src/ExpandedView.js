@@ -21,11 +21,17 @@ import {
   Text,
 } from "@chakra-ui/react";
 import MyTreeView from "./treeview";
+import { useEffect } from "react";
 
 const ExpandedView = () => {
-  const link = (window.location + "").split("host-vars/a.yaml/")[1];
+  const link = window.location + "";
   let itemArr = [];
-  link.split("/").map((item) => itemArr.push(item));
+  link.split("/").map((item, index) => {
+    if (index > 5) {
+      itemArr.push(item);
+    } else {
+    }
+  });
   const [disable, setDisable] = useState(true);
   const [obj, setObj] = useState({});
   const [obj2, setObj2] = useState({});
@@ -34,14 +40,17 @@ const ExpandedView = () => {
   const [content, setContent] = useState();
   const k = window.location.href.split("/");
   const [inventory, setInventory] = useState();
-  axios
-    .post("/host-vars-expanded", { ref: k[5], itemArr: itemArr })
-    .then((res) => {
-      setObj(res.data.response);
-      setObj2(res.data.response2);
-      setInventory(res.data.inventory);
-      setCame(true);
-    });
+  useEffect(() => {
+    axios
+      .post("/host-vars-expanded", { ref: k[5], itemArr: itemArr })
+      .then((res) => {
+        setObj(res.data.response);
+        setObj2(res.data.response2);
+        setInventory(res.data.inventory);
+        setCame(true);
+      });
+  }, []);
+
   function edit() {
     setDisable(false);
     setSubmitActive(true);
@@ -74,9 +83,7 @@ const ExpandedView = () => {
           <AccordionPanel pb={4} bg="#FFF5F5">
             {typeof nodes[1] === "object" ? (
               Array.isArray(nodes[1]) ? (
-                nodes[1].map((node) =>
-                  Object.entries(node).map((item) => renderTree(item, path))
-                )
+                Object.entries(nodes[1]).map((item) => renderTree(item, path))
               ) : (
                 Object.entries(nodes[1]).map((node) => renderTree(node, path))
               )

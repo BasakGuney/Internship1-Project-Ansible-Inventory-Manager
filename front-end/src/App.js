@@ -13,8 +13,10 @@ import {
   TabList,
   TabPanels,
   Tab,
+  Text,
   TabPanel,
   Button,
+  Checkbox,
   Link,
   Menu,
   MenuIcon,
@@ -24,16 +26,17 @@ import {
   MenuButton,
 } from "@chakra-ui/react";
 import { ChevronDownIcon } from "@chakra-ui/icons";
-import { useState } from "react";
-import axios from "axios";
-import { TreeItem } from "@mui/x-tree-view";
-import { TreeView } from "@mui/x-tree-view";
-import { useEffect } from "react";
-import NavBar from "./NavBar";
-import FileButton from "./FileButton";
-import ExpandedView from "./ExpandedView";
+import { useEffect, useState } from "react";
 
 function App() {
+  const obj = {
+    a: { b: { c: { g: "h" } }, p: { u: "l" } },
+    d: { e: { f: { i: "k" } } },
+  };
+  const initialCheckedItems = { a: ["p"], d: [] };
+  const [yamlText, setYamlText] = useState("");
+  const label = { inputProps: { "aria-label": "Checkbox demo" } };
+  const [clicked, setClicked] = useState(false);
   const [redirection, setRedirection] = useState("inventory");
   function submitFile() {
     var input = document.getElementById("formFileSm");
@@ -45,14 +48,15 @@ function App() {
       method: "POST",
       body: formData,
     });
-    setRedirection("/" + ("" + input.files[0].name).split(".zip")[0]);
+
+    window.location = "/" + ("" + input.files[0].name).split(".zip")[0];
   }
 
   return (
     <>
       <Router>
         <Switch>
-          <Route exact path="/:variable/">
+          <Route exact path="/">
             <ChakraProvider>
               <Tabs size="md" variant="enclosed">
                 <TabList>
@@ -67,12 +71,13 @@ function App() {
                         id="formFileSm"
                         type="file"
                         name="files"
-                        onChange={submitFile}
                       />
-                      <Button size="sm" colorScheme="facebook">
-                        <Link as="a" color="white" href={redirection}>
-                          Submit
-                        </Link>
+                      <Button
+                        size="sm"
+                        colorScheme="facebook"
+                        onClick={submitFile}
+                      >
+                        Submit
                       </Button>
                     </Stack>
                     <Tabs defaultIndex={0}>
@@ -83,90 +88,114 @@ function App() {
                       </TabList>
 
                       <TabPanels>
-                        <TabPanel> </TabPanel>
                         <TabPanel>
-                          <FileButton></FileButton>
+                          {Object.keys(obj).map((key) =>
+                            typeof obj[key] == "object" ||
+                            Array.isArray(obj[key]) ? (
+                              <>
+                                <Checkbox
+                                  value={key + ":\n"}
+                                  id={key}
+                                  defaultChecked={
+                                    initialCheckedItems[key] !== undefined
+                                      ? true
+                                      : false
+                                  }
+                                  onChange={() => {
+                                    let text = "";
+                                    Object.keys(obj).map((key) => {
+                                      if (
+                                        document.getElementById(key).checked
+                                      ) {
+                                        text =
+                                          text +
+                                          document.getElementById(key).value;
+                                      }
+
+                                      Object.keys(obj[key]).map((subKey) => {
+                                        if (
+                                          document.getElementById(
+                                            key + "." + subKey
+                                          ).checked
+                                        ) {
+                                          text =
+                                            text +
+                                            document.getElementById(
+                                              key + "." + subKey
+                                            ).value;
+                                        }
+                                      });
+                                    });
+                                    setYamlText(text);
+                                  }}
+                                >
+                                  {key}
+                                </Checkbox>
+                                <br></br>
+                                {Object.keys(obj[key]).map((subKey) =>
+                                  typeof obj[key][subKey] == "object" ||
+                                  Array.isArray(obj[key][subKey]) ? (
+                                    <Stack pl={6} mt={1} spacing={1}>
+                                      <Checkbox
+                                        onChange={() => {
+                                          let text = "";
+                                          Object.keys(obj).map((key) => {
+                                            if (
+                                              document.getElementById(key)
+                                                .checked
+                                            ) {
+                                              text =
+                                                text +
+                                                document.getElementById(key)
+                                                  .value;
+                                            }
+
+                                            Object.keys(obj[key]).map(
+                                              (subKey) => {
+                                                if (
+                                                  document.getElementById(
+                                                    key + "." + subKey
+                                                  ).checked
+                                                ) {
+                                                  text =
+                                                    text +
+                                                    document.getElementById(
+                                                      key + "." + subKey
+                                                    ).value;
+                                                }
+                                              }
+                                            );
+                                          });
+                                          setYamlText(text);
+                                        }}
+                                        id={subKey}
+                                        value={"\t" + obj[key][subKey]}
+                                        defaultChecked={
+                                          Array.isArray(
+                                            initialCheckedItems[key]
+                                          )
+                                            ? initialCheckedItems[key].includes(
+                                                subKey
+                                              )
+                                              ? true
+                                              : false
+                                            : false
+                                        }
+                                      >
+                                        {subKey}
+                                      </Checkbox>
+                                    </Stack>
+                                  ) : null
+                                )}
+                              </>
+                            ) : null
+                          )}
+                          <Text value={yamlText}></Text>
                         </TabPanel>
+                        <TabPanel></TabPanel>
                         <TabPanel></TabPanel>
                       </TabPanels>
                     </Tabs>
-                  </TabPanel>
-                  <TabPanel></TabPanel>
-                </TabPanels>
-              </Tabs>
-            </ChakraProvider>
-          </Route>
-          <Route exact path="/:variable/host-vars/:variable">
-            <NavBar index={1}></NavBar>
-          </Route>
-          <Route path="/:variable/host-vars/">
-            <ChakraProvider>
-              <Tabs size="md" variant="enclosed">
-                <TabList>
-                  <Tab>Update Inventory</Tab>
-                  <Tab>Create Inventory</Tab>
-                </TabList>
-                <TabPanels>
-                  <TabPanel>
-                    <Stack gap={0} direction="row" width="50%">
-                      <input
-                        class="form-control form-control-sm"
-                        id="formFileSm"
-                        type="file"
-                        name="files"
-                        onChange={submitFile}
-                      />
-                      <Button size="sm" colorScheme="facebook">
-                        Submit
-                      </Button>
-                    </Stack>
-                    <Tabs defaultIndex={1}>
-                      <TabList>
-                        <Tab>Hosts</Tab>
-                        <Tab>Host Vars</Tab>
-                        <Tab>Group Vars</Tab>
-                      </TabList>
-
-                      <TabPanels>
-                        <TabPanel> </TabPanel>
-                        <TabPanel>
-                          <ExpandedView></ExpandedView>
-                        </TabPanel>
-                        <TabPanel></TabPanel>
-                      </TabPanels>
-                    </Tabs>
-                  </TabPanel>
-                  <TabPanel>
-                    <ExpandedView></ExpandedView>
-                  </TabPanel>
-                </TabPanels>
-              </Tabs>
-            </ChakraProvider>
-          </Route>
-
-          <Route>
-            <ChakraProvider>
-              <Tabs size="md" variant="enclosed">
-                <TabList>
-                  <Tab>Update Inventory</Tab>
-                  <Tab>Create Inventory</Tab>
-                </TabList>
-                <TabPanels>
-                  <TabPanel>
-                    <Stack gap={0} direction="row" width="50%">
-                      <input
-                        class="form-control form-control-sm"
-                        id="formFileSm"
-                        type="file"
-                        name="files"
-                        onChange={submitFile}
-                      />
-                      <Button size="sm" colorScheme="facebook">
-                        <Link as="a" color="white" href={redirection}>
-                          Submit
-                        </Link>
-                      </Button>
-                    </Stack>
                   </TabPanel>
                   <TabPanel></TabPanel>
                 </TabPanels>

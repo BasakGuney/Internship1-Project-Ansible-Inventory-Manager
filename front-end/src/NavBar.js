@@ -16,6 +16,7 @@ import MyTreeView from "./treeview";
 import { Box } from "@mui/material";
 import { useState } from "react";
 import LeftBar from "./LeftBar";
+import FileButton from "./FileButton";
 
 const NavBar = (props) => {
   function submitFile() {
@@ -45,9 +46,8 @@ const NavBar = (props) => {
                   id="formFileSm"
                   type="file"
                   name="files"
-                  onChange={submitFile}
                 />
-                <Button size="sm" colorScheme="facebook">
+                <Button size="sm" colorScheme="facebook" onClick={submitFile}>
                   Submit
                 </Button>
               </Stack>
@@ -61,6 +61,8 @@ const NavBar = (props) => {
                 <TabPanels>
                   <TabPanel> </TabPanel>
                   <TabPanel>
+                    <FileButton></FileButton>
+                    <br></br>
                     <LeftBar></LeftBar>
                   </TabPanel>
                   <TabPanel></TabPanel>
@@ -68,6 +70,8 @@ const NavBar = (props) => {
               </Tabs>
             </TabPanel>
             <TabPanel>
+              <FileButton></FileButton>
+              <br></br>
               <LeftBar></LeftBar>
             </TabPanel>
           </TabPanels>
