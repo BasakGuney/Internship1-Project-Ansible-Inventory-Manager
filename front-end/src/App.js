@@ -27,17 +27,32 @@ import {
 } from "@chakra-ui/react";
 import { ChevronDownIcon } from "@chakra-ui/icons";
 import { useEffect, useState } from "react";
+import Editor from "@monaco-editor/react";
 
 function App() {
   const obj = {
     a: { b: { c: { g: "h" } }, p: { u: "l" } },
     d: { e: { f: { i: "k" } } },
   };
-  const initialCheckedItems = { a: ["p"], d: [] };
+  const initialCheckedItems = { network: ["hostname", "gateway", "interface"] };
   const [yamlText, setYamlText] = useState("");
+  const yamlObj = {
+    network: {
+      hostname: "basak-guney",
+      gateway: "1234",
+      interface: [
+        "-name: basak\n surname: guney\n-name: burcak\n surname: guney\n",
+      ],
+    },
+    "swarm-labels": [
+      "-key: ahmet\nvalue: nesrin\n",
+      "-key: basak\nvalue: burcak\n",
+    ],
+  };
   const label = { inputProps: { "aria-label": "Checkbox demo" } };
   const [clicked, setClicked] = useState(false);
   const [redirection, setRedirection] = useState("inventory");
+  const [showEditor, setShowEditor] = useState(false);
   function submitFile() {
     var input = document.getElementById("formFileSm");
     const formData = new FormData();
@@ -89,14 +104,17 @@ function App() {
 
                       <TabPanels>
                         <TabPanel>
-                          {Object.keys(obj).map((key) =>
-                            typeof obj[key] == "object" ||
-                            Array.isArray(obj[key]) ? (
+                          {Object.keys(yamlObj).map((key) =>
+                            typeof yamlObj[key] == "object" ||
+                            Array.isArray(yamlObj[key]) ? (
                               <>
                                 <Checkbox
                                   onChange={() => {
+                                    setShowEditor(true);
+                                    setShowEditor(false);
+                                    setTimeout(setShowEditor(true), 30);
                                     let text = "";
-                                    Object.keys(obj).map((key) => {
+                                    Object.keys(yamlObj).map((key) => {
                                       if (
                                         document.getElementById(key).checked
                                       ) {
@@ -105,23 +123,33 @@ function App() {
                                           document.getElementById(key).value;
                                       }
 
-                                      Object.keys(obj[key]).map((subKey) => {
-                                        if (
-                                          document.getElementById(
-                                            key + "." + subKey
-                                          ).checked
-                                        ) {
-                                          text =
-                                            text +
+                                      Object.keys(yamlObj[key]).map(
+                                        (subKey) => {
+                                          if (
                                             document.getElementById(
                                               key + "." + subKey
-                                            ).value;
+                                            ) !== null &&
+                                            document.getElementById(
+                                              key + "." + subKey
+                                            ).checked
+                                          ) {
+                                            text =
+                                              text +
+                                              document.getElementById(
+                                                key + "." + subKey
+                                              ).value;
+                                          }
                                         }
-                                      });
+                                      );
                                     });
                                     setYamlText(text);
                                   }}
-                                  value={JSON.stringify(key) + ":\n"}
+                                  value={
+                                    typeof yamlObj[key] == "object" ||
+                                    Array.isArray(yamlObj[key])
+                                      ? key + ":\n"
+                                      : key + ": " + yamlObj[key] + "\n"
+                                  }
                                   id={key}
                                   defaultChecked={
                                     initialCheckedItems[key] !== undefined
@@ -132,14 +160,17 @@ function App() {
                                   {key}
                                 </Checkbox>
                                 <br></br>
-                                {Object.keys(obj[key]).map((subKey) =>
-                                  typeof obj[key][subKey] == "object" ||
-                                  Array.isArray(obj[key][subKey]) ? (
+                                {Object.keys(yamlObj[key]).map((subKey) =>
+                                  typeof yamlObj[key] == "object" ||
+                                  Array.isArray(yamlObj[key]) ? (
                                     <Stack pl={6} mt={1} spacing={1}>
                                       <Checkbox
                                         onChange={() => {
+                                          setShowEditor(true);
+                                          setShowEditor(false);
+                                          setTimeout(setShowEditor(true), 30);
                                           let text = "";
-                                          Object.keys(obj).map((key) => {
+                                          Object.keys(yamlObj).map((key) => {
                                             if (
                                               document.getElementById(key)
                                                 .checked
@@ -150,9 +181,12 @@ function App() {
                                                   .value;
                                             }
 
-                                            Object.keys(obj[key]).map(
+                                            Object.keys(yamlObj[key]).map(
                                               (subKey) => {
                                                 if (
+                                                  document.getElementById(
+                                                    key + "." + subKey
+                                                  ) !== null &&
                                                   document.getElementById(
                                                     key + "." + subKey
                                                   ).checked
@@ -170,10 +204,40 @@ function App() {
                                         }}
                                         id={key + "." + subKey}
                                         value={
-                                          "\t" +
-                                          JSON.stringify(obj[key]) +
-                                          ": " +
-                                          JSON.stringify(obj[key][subKey])
+                                          Array.isArray(yamlObj[key])
+                                            ? "  " +
+                                              ("" + yamlObj[key][subKey])
+                                                .substring(
+                                                  0,
+                                                  "" +
+                                                    yamlObj[key][subKey]
+                                                      .length -
+                                                    1
+                                                )
+                                                .replaceAll("\n", "\n   ") +
+                                              "\n"
+                                            : typeof yamlObj[key][subKey] ==
+                                                "object" ||
+                                              Array.isArray(
+                                                yamlObj[key][subKey]
+                                              )
+                                            ? "  " +
+                                              subKey +
+                                              ":\n" +
+                                              "    " +
+                                              ("" + yamlObj[key][subKey])
+                                                .substring(
+                                                  0,
+                                                  ("" + yamlObj[key][subKey])
+                                                    .length - 1
+                                                )
+                                                .replaceAll("\n", "\n    ") +
+                                              "\n"
+                                            : "  " +
+                                              subKey +
+                                              ": " +
+                                              yamlObj[key][subKey] +
+                                              "\n"
                                         }
                                         defaultChecked={
                                           Array.isArray(
@@ -196,7 +260,17 @@ function App() {
                             ) : null
                           )}
 
-                          <textarea value={yamlText}></textarea>
+                          <br></br>
+                          {showEditor ? (
+                            <Editor
+                              width="50%"
+                              height="90vh"
+                              defaultLanguage="yaml"
+                              value={yamlText}
+                            >
+                              {yamlText}
+                            </Editor>
+                          ) : null}
                         </TabPanel>
                         <TabPanel></TabPanel>
                         <TabPanel></TabPanel>
